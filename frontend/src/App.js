@@ -11,6 +11,9 @@ import ServicesPage from './components/Services/Services';
 import ServiceDetailsPage from './components/Services/ServiceDetail';
 import AboutUsPage from './components/AboutUsPage/AboutUsPage';
 import ContactForm from './components/ContactForm/ContactForm';
+import ProtectedRoute from "./utils/ProtectedRoute";
+import Login from "./components/Auth/Login";
+import Register from "./components/Auth/Register";
 
 const App = () => {
   return (
@@ -20,11 +23,13 @@ const App = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:id" element={<BlogPostDetail/>} />
-        <Route path='/adminblog' element={<AdminBlog/>}/>
+        <Route path="/adminblog" element={<ProtectedRoute><AdminBlog /></ProtectedRoute>}/>
         <Route path='/services' element={<ServicesPage/>}/>
         <Route path='/services/:id' element={<ServiceDetailsPage/>}/>
         <Route path='/about' element={<AboutUsPage/>}/>
         <Route path='/contactus' element={<ContactForm/>}/>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
       <Footer />
     </Router>

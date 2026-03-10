@@ -49,7 +49,6 @@ __pycache__/
 
 # Ignore virtual environment
 venv/
-.env/
 
 # Ignore generated files
 *.min.js

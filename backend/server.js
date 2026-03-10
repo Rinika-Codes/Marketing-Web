@@ -1,23 +1,23 @@
 const express = require("express");
+require("dotenv").config();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const blogRoutes = require("./routes/blogRoutes");
-const serviceRoutes = require('./routes/serviceRoutes')
+const serviceRoutes = require("./routes/serviceRoutes");
 const cors = require("cors");
+const authRoutes = require("./routes/auth");
 
 const app = express();
-const port = 8000;
+const port = process.env.PORT || 8000;
 
-// Middleware to parse JSON requests
 app.use(bodyParser.json());
 app.use(cors());
+app.use("/api/auth", authRoutes);
 
-// MongoDB connection
 const connectToMongoDB = async () => {
   try {
-    const connectionString = "mongodb+srv://veera:Railand%40Veera@cluster0.fydvm4t.mongodb.net/test";
-    await mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);
@@ -26,47 +26,52 @@ const connectToMongoDB = async () => {
 
 connectToMongoDB();
 
-// Use the blog routes
 app.use("/blogs", blogRoutes);
 app.use("/services", serviceRoutes);
 
-// Route to handle email sending
-app.post('/send-email', async (req, res) => {
+app.post("/send-email", async (req, res) => {
   const { name, email, phone, message } = req.body;
 
-  // TODO: Add server-side validation
-
   try {
-    // Send email using nodemailer (configure transporter with your email service)
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
-        user: 'testnodemailerrai@gmail.com', // Replace with your email
-        pass: 'Test@Nodemailer@Rai', // Replace with your password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
     const mailOptions = {
-      from: email, // Using the user's email as the sender
-      to: 'testmail@example.com', // Replace with your designated email
-      subject: 'New Contact Form Submission',
-      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`,
+      from: process.env.EMAIL_USER,
+      replyTo: email,
+      to: process.env.EMAIL_TO,
+      subject: "New Contact Form Submission",
+      text: `Name: ${name}
+Email: ${email}
+Phone: ${phone}
+Message: ${message}`,
     };
 
-    // Send the email
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.response);
-    
-    res.status(200).json({ success: true, message: 'Email sent successfully' });
+
+    console.log("Email sent:", info.response);
+
+    res.status(200).json({
+      success: true,
+      message: "Email sent successfully",
+    });
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ success: false, error: 'Error sending email' });
+    console.error("Error sending email:", error);
+
+    res.status(500).json({
+      success: false,
+      error: "Error sending email",
+    });
   }
 });
 
-// Start the server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
 
-module.exports = app; // Export the app for testing or other potential use
+module.exports = app;
